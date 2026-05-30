@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dreamy Bookstore</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<!-- QR code library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2; --ink: #1A1208; --brown: #6B4226;
+    --gold: #C9943A; --warm-gray: #E8E2D9; --muted: #7A6E62;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+  /* NAV */
+  nav { display:flex; align-items:center; justify-content:space-between; padding:1.2rem 2.5rem; background:var(--ink); position:sticky; top:0; z-index:100; flex-wrap:wrap; gap:0.75rem; }
+  .logo { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--cream); letter-spacing:0.02em; }
+  .logo span { color:var(--gold); }
+  nav ul { list-style:none; display:flex; gap:2rem; }
+  nav ul a { color:var(--warm-gray); text-decoration:none; font-size:0.9rem; font-weight:300; letter-spacing:0.05em; text-transform:uppercase; transition:color 0.2s; }
+  nav ul a:hover { color:var(--gold); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .lang-switcher { display:flex; gap:4px; }
+  .lang-btn { background:transparent; color:var(--warm-gray); border:1px solid rgba(255,255,255,0.2); padding:4px 10px; font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:500; cursor:pointer; border-radius:2px; letter-spacing:0.05em; text-transform:uppercase; transition:all 0.2s; }
+  .lang-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .lang-btn.active { background:var(--gold); color:var(--ink); border-color:var(--gold); }
+  .nav-cart { background:var(--gold); color:var(--ink); border:none; padding:0.5rem 1.2rem; font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; cursor:pointer; border-radius:2px; letter-spacing:0.05em; transition:opacity 0.2s; }
+  .nav-cart:hover { opacity:0.85; }
+
+  /* HERO */
+  .hero { display:grid; grid-template-columns:1fr 1fr; min-height:420px; background:var(--brown); overflow:hidden; }
+  .hero-text { padding:4rem 3rem; display:flex; flex-direction:column; justify-content:center; gap:1.5rem; }
+  .hero-tag { font-size:0.75rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); font-weight:500; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:3.2rem; line-height:1.15; color:var(--cream); font-weight:700; }
+  .hero h1 em { font-style:italic; color:var(--gold); }
+  .hero-desc { color:#D8CFC4; font-weight:300; font-size:1.05rem; line-height:1.7; max-width:380px; }
+  .hero-btns { display:flex; gap:1rem; flex-wrap:wrap; }
+  .btn-primary { background:var(--gold); color:var(--ink); border:none; padding:0.75rem 1.8rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:500; cursor:pointer; border-radius:2px; text-decoration:none; display:inline-block; letter-spacing:0.03em; transition:opacity 0.2s; }
+  .btn-primary:hover { opacity:0.85; }
+  .btn-outline { background:transparent; color:var(--cream); border:1px solid rgba(255,255,255,0.35); padding:0.75rem 1.8rem; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:400; cursor:pointer; border-radius:2px; text-decoration:none; display:inline-block; letter-spacing:0.03em; transition:all 0.2s; }
+  .btn-outline:hover { border-color:var(--gold); color:var(--gold); }
+  .hero-visual { display:flex; align-items:flex-end; justify-content:center; padding:0; overflow:hidden; background:linear-gradient(135deg,#7A4F2E 0%,#4A2810 100%); }
+  .hero-img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* SECTIONS */
+  .section { padding:3.5rem 2.5rem; }
+  .section-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2rem; }
+  .section-title { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; color:var(--ink); }
+  .see-all { color:var(--gold); font-size:0.85rem; text-decoration:none; letter-spacing:0.05em; text-transform:uppercase; font-weight:500; border-bottom:1px solid var(--gold); padding-bottom:1px; cursor:pointer; }
+
+  /* GENRES */
+  .genre-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1rem; }
+  .genre-pill { background:var(--ink); color:var(--cream); text-align:center; padding:1rem 0.5rem; border-radius:4px; font-size:0.85rem; font-weight:400; cursor:pointer; letter-spacing:0.04em; transition:background 0.2s; border:2px solid transparent; }
+  .genre-pill:hover, .genre-pill.active { background:var(--brown); border-color:var(--gold); color:var(--gold); }
+  .genre-pill .genre-icon { font-size:1.4rem; display:block; margin-bottom:0.4rem; }
+
+  /* BOOK CARDS */
+  .books-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.5rem; }
+  .book-card { background:#fff; border-radius:4px; overflow:hidden; transition:transform 0.2s; border:1px solid var(--warm-gray); }
+  .book-card:hover { transform:translateY(-4px); }
+  .book-cover { width:100%; height:260px; position:relative; overflow:hidden; background:#2a1a0a; display:flex; align-items:flex-end; }
+  .book-cover img { width:100%; height:100%; object-fit:cover; display:block; position:absolute; top:0; left:0; }
+  .book-cover-overlay { position:absolute; bottom:0; left:0; right:0; padding:1rem; background:linear-gradient(transparent,rgba(0,0,0,0.65)); z-index:1; }
+  .book-cover-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:#fff; line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.5); }
+  .badge { position:absolute; top:0.75rem; right:0.75rem; background:var(--gold); color:var(--ink); font-size:0.7rem; font-weight:500; padding:3px 8px; border-radius:2px; letter-spacing:0.05em; text-transform:uppercase; z-index:2; }
+  .book-info { padding:1rem; }
+  .book-genre { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.3rem; }
+  .book-info h3 { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; margin-bottom:0.2rem; line-height:1.3; }
+  .book-author { font-size:0.82rem; color:var(--muted); font-weight:300; margin-bottom:0.75rem; }
+  .book-footer { display:flex; align-items:center; justify-content:space-between; margin-top:0.75rem; }
+  .book-price { font-size:1.05rem; font-weight:500; color:var(--brown); }
+  .old-price { font-size:0.8rem; color:var(--muted); text-decoration:line-through; margin-left:4px; font-weight:300; }
+  .stars { color:var(--gold); font-size:0.75rem; letter-spacing:1px; }
+
+  /* ── CART CONTROLS (+ / count / -) ── */
+  .cart-controls { display:flex; align-items:center; gap:6px; }
+  .cart-btn {
+    background:var(--ink); color:var(--cream); border:none;
+    width:28px; height:28px; border-radius:50%; font-size:1rem;
+    cursor:pointer; transition:background 0.2s;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    font-weight:500; line-height:1;
+  }
+  .cart-btn:hover { background:var(--brown); }
+  .cart-btn.minus { background:var(--warm-gray); color:var(--ink); }
+  .cart-btn.minus:hover { background:#d0c8be; }
+  .cart-count-badge {
+    min-width:22px; height:22px; background:var(--gold); color:var(--ink);
+    border-radius:11px; font-size:0.8rem; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    padding:0 5px; display:none;
+  }
+
+  /* PROMO */
+  .promo-banner { margin:0 2.5rem; background:var(--ink); border-radius:4px; padding:2.5rem 3rem; display:flex; align-items:center; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+  .promo-text { flex:1; }
+  .promo-text h2 { font-family:'Playfair Display',serif; font-size:2rem; color:var(--cream); margin-bottom:0.5rem; }
+  .promo-text h2 span { color:var(--gold); }
+  .promo-text p { color:#B0A898; font-weight:300; font-size:0.95rem; }
+
+  /* FOOTER */
+  footer { margin-top:4rem; background:var(--ink); padding:2.5rem 2.5rem 1.5rem; color:var(--warm-gray); }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:2rem; margin-bottom:2rem; }
+  .footer-logo { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--cream); margin-bottom:0.75rem; }
+  .footer-logo span { color:var(--gold); }
+  footer p { font-size:0.85rem; color:#8A7E70; line-height:1.7; }
+  .footer-col h4 { font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem; font-weight:500; }
+  .footer-col ul { list-style:none; }
+  .footer-col ul li { margin-bottom:0.5rem; }
+  .footer-col ul a { color:#8A7E70; text-decoration:none; font-size:0.85rem; transition:color 0.2s; cursor:pointer; }
+  .footer-col ul a:hover { color:var(--cream); }
+  .footer-bottom { border-top:1px solid rgba(255,255,255,0.08); padding-top:1rem; text-align:center; font-size:0.78rem; color:#5A5045; }
+
+  /* ── CONTACT MODAL ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; padding:1rem; overflow-y:auto; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--cream); border-radius:6px; width:100%; max-width:560px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.4); animation:slideUp 0.25s ease; margin:auto; }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-header { background:var(--ink); padding:1.5rem 2rem; display:flex; align-items:center; justify-content:space-between; }
+  .modal-header h2 { font-family:'Playfair Display',serif; color:var(--cream); font-size:1.4rem; }
+  .modal-close { background:none; border:none; color:var(--warm-gray); font-size:1.5rem; cursor:pointer; line-height:1; transition:color 0.2s; }
+  .modal-close:hover { color:var(--gold); }
+  .modal-body { padding:2rem; }
+
+  /* Contact cards */
+  .contact-cards { display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; }
+  .contact-card { display:flex; align-items:center; gap:1rem; padding:1rem 1.2rem; background:#fff; border:1px solid var(--warm-gray); border-radius:4px; text-decoration:none; color:var(--ink); transition:border-color 0.2s, transform 0.15s; }
+  .contact-card:hover { border-color:var(--gold); transform:translateX(4px); }
+  .contact-icon { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+  .contact-icon.phone { background:#E8F5E9; }
+  .contact-icon.insta { background:#FCE4EC; }
+  .contact-icon.email { background:#E3F2FD; }
+  .contact-label { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px; }
+  .contact-value { font-size:0.95rem; font-weight:500; }
+
+  /* QR code section */
+  .qr-section { background:#fff; border:1px solid var(--warm-gray); border-radius:4px; padding:1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1.5rem; }
+  .qr-box { flex-shrink:0; }
+  .qr-box canvas, .qr-box img { border-radius:4px; }
+  .qr-info h4 { font-family:'Playfair Display',serif; font-size:1rem; margin-bottom:0.3rem; }
+  .qr-info p { font-size:0.82rem; color:var(--muted); line-height:1.5; }
+
+  /* Message form */
+  .modal-divider { text-align:center; font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:1.25rem; position:relative; }
+  .modal-divider::before, .modal-divider::after { content:''; position:absolute; top:50%; width:38%; height:1px; background:var(--warm-gray); }
+  .modal-divider::before { left:0; }
+  .modal-divider::after  { right:0; }
+  .form-group { margin-bottom:1rem; }
+  .form-group label { display:block; font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.4rem; }
+  .form-group input, .form-group textarea { width:100%; padding:0.65rem 0.9rem; border:1px solid var(--warm-gray); border-radius:3px; font-family:'DM Sans',sans-serif; font-size:0.9rem; background:#fff; color:var(--ink); transition:border-color 0.2s; resize:vertical; }
+  .form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--gold); }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .btn-send { width:100%; padding:0.8rem; background:var(--gold); color:var(--ink); border:none; border-radius:3px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:opacity 0.2s; letter-spacing:0.03em; }
+  .btn-send:hover { opacity:0.85; }
+  .form-success { display:none; text-align:center; padding:1rem; color:#2D5A1B; background:#E8F5E9; border-radius:4px; font-size:0.9rem; margin-top:0.75rem; }
+
+  /* CART SIDEBAR */
+  .cart-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:900; }
+  .cart-overlay.open { display:block; }
+  .cart-sidebar {
+    position:fixed; top:0; right:-420px; width:400px; max-width:95vw; height:100vh;
+    background:var(--cream); z-index:901; transition:right 0.3s ease;
+    display:flex; flex-direction:column; box-shadow:-4px 0 20px rgba(0,0,0,0.2);
+  }
+  .cart-sidebar.open { right:0; }
+  .cart-sidebar-header { background:var(--ink); padding:1.2rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+  .cart-sidebar-header h3 { font-family:'Playfair Display',serif; color:var(--cream); font-size:1.2rem; }
+  .cart-sidebar-body { flex:1; overflow-y:auto; padding:1rem 1.5rem; }
+  .cart-empty { text-align:center; padding:3rem 1rem; color:var(--muted); }
+  .cart-empty span { font-size:3rem; display:block; margin-bottom:1rem; }
+  .cart-item { display:flex; align-items:center; gap:1rem; padding:0.9rem 0; border-bottom:1px solid var(--warm-gray); }
+  .cart-item-title { flex:1; font-size:0.9rem; font-weight:500; line-height:1.3; }
+  .cart-item-author { font-size:0.75rem; color:var(--muted); }
+  .cart-item-price { font-size:0.95rem; font-weight:500; color:var(--brown); white-space:nowrap; }
+  .cart-item-controls { display:flex; align-items:center; gap:5px; }
+  .ci-btn { width:26px; height:26px; border-radius:50%; border:none; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; font-weight:600; transition:background 0.2s; }
+  .ci-plus { background:var(--ink); color:var(--cream); }
+  .ci-plus:hover { background:var(--brown); }
+  .ci-minus { background:var(--warm-gray); color:var(--ink); }
+  .ci-minus:hover { background:#d0c8be; }
+  .ci-count { font-size:0.85rem; font-weight:600; min-width:16px; text-align:center; }
+  .cart-sidebar-footer { padding:1.5rem; border-top:1px solid var(--warm-gray); background:#fff; }
+  .cart-total { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem; }
+  .cart-total span:first-child { font-size:0.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+  .cart-total-price { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--ink); }
+  .btn-checkout { width:100%; padding:0.85rem; background:var(--gold); color:var(--ink); border:none; border-radius:3px; font-family:'DM Sans',sans-serif; font-size:0.95rem; font-weight:500; cursor:pointer; transition:opacity 0.2s; }
+  .btn-checkout:hover { opacity:0.85; }
+
+  /* CHECKOUT order list items */
+  .co-item { display:flex; justify-content:space-between; align-items:baseline; font-size:0.88rem; }
+  .co-item-name { color:var(--ink); font-weight:500; }
+  .co-item-qty { color:var(--muted); font-size:0.8rem; margin-left:4px; }
+  .co-item-price { color:var(--brown); font-weight:500; white-space:nowrap; }
+
+  @media (max-width:768px) {
+    .hero { grid-template-columns:1fr; }
+    .hero-visual { min-height:200px; }
+    .footer-grid { grid-template-columns:1fr 1fr; }
+    nav ul { display:none; }
+    .form-row { grid-template-columns:1fr; }
+    .qr-section { flex-direction:column; text-align:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Dreamy<span>Book</span> Store</div>
+  <ul>
+    <li><a href="#" data-i18n="nav_shop">Shop</a></li>
+    <li><a href="#" data-i18n="nav_new">New Arrivals</a></li>
+    <li><a href="#" data-i18n="nav_best">Bestsellers</a></li>
+    <li><a href="#" data-i18n="nav_about">About</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('ru')">RU</button>
+      <button class="lang-btn" onclick="setLang('tr')">TR</button>
+      <button class="lang-btn" onclick="setLang('tk')">TK</button>
+    </div>
+    <button class="nav-cart" onclick="openCart()" data-i18n="cart">🛒 Cart (0)</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="hero-tag" data-i18n="hero_tag">— Spring Sale · Up to 40% Off</p>
+    <h1 data-i18n="hero_title">Stories that<br/>stay with you <em>forever.</em></h1>
+    <p class="hero-desc" data-i18n="hero_desc">Curated books for every reader. From timeless classics to debut novels — your next favorite is here.</p>
+    <div class="hero-btns">
+      <a href="#books" class="btn-primary" data-i18n="hero_btn1">Browse Collection</a>
+      <a href="#" class="btn-outline" data-i18n="hero_btn2">View Bestsellers</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <!--
+      ★ Replace with your own image:
+      <img src="bookshelf2.jpg" class="hero-img" alt="bookshelf" />
+    
+    <div style="display:flex;align-items:flex-end;gap:6px;padding:2rem;width:100%;justify-content:center;">
+      <div style="width:52px;height:190px;background:#C9943A;border-radius:2px 4px 4px 2px;box-shadow:3px 3px 12px rgba(0,0,0,0.4);"></div>
+      <div style="width:44px;height:160px;background:#FAF7F2;border-radius:2px 4px 4px 2px;box-shadow:3px 3px 12px rgba(0,0,0,0.4);"></div>
+      <div style="width:58px;height:210px;background:#3B2310;border:1px solid #5A3A20;border-radius:2px 4px 4px 2px;box-shadow:3px 3px 12px rgba(0,0,0,0.4);"></div>
+      <div style="width:40px;height:140px;background:#8B5A3A;border-radius:2px 4px 4px 2px;box-shadow:3px 3px 12px rgba(0,0,0,0.4);"></div>
+      <div style="width:54px;height:200px;background:#E8C98A;border-radius:2px 4px 4px 2px;box-shadow:3px 3px 12px rgba(0,0,0,0.4);"></div>
+    </div>-->
+<img src="bookshelf1.jpg" class="hero-img" alt="bookshelf" />
+  </div>
+</section>
+
+<!-- GENRES -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title" data-i18n="genre_title">Browse by Genre</h2>
+  </div>
+  <div class="genre-grid">
+    <div class="genre-pill active"><span class="genre-icon">📚</span><span data-i18n="genre_all">All Books</span></div>
+    <div class="genre-pill"><span class="genre-icon">🔮</span><span data-i18n="genre_fantasy">Fantasy</span></div>
+    <div class="genre-pill"><span class="genre-icon">🔍</span><span data-i18n="genre_mystery">Mystery</span></div>
+    <div class="genre-pill"><span class="genre-icon">❤️</span><span data-i18n="genre_romance">Romance</span></div>
+    <div class="genre-pill"><span class="genre-icon">🚀</span><span data-i18n="genre_scifi">Sci-Fi</span></div>
+    <div class="genre-pill"><span class="genre-icon">📖</span><span data-i18n="genre_classics">Classics</span></div>
+    <div class="genre-pill"><span class="genre-icon">🌿</span><span data-i18n="genre_nonfiction">Non-Fiction</span></div>
+    <div class="genre-pill"><span class="genre-icon">🧒</span><span data-i18n="genre_children">Children</span></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BOOKS
+     ★ Edit each book:
+       - Uncomment <img src="bookX.jpg"> and set your filename
+       - Change style="background:#XXXXXX" to any color you like
+       - Edit title, author, genre, stars, price directly
+       - Remove <span class="old-price"> if no sale price
+       - Delete or change <span class="badge"> text
+     ★ To add more books: copy a full book-card block
+============================================================ -->
+<section class="section" id="books" style="padding-top:0;">
+  <div class="section-header">
+    <h2 class="section-title" data-i18n="featured_title">Featured Books</h2>
+    <a class="see-all" href="#" data-i18n="see_all">See All</a>
+  </div>
+  <div class="books-grid">
+
+    <!-- ★ BOOK 1 -->
+    <div class="book-card" data-title="Book Title 1" data-price="0.00">
+      <div class="book-cover" style="background:#1A3A5C;">
+       
+         <img src="atomic-habits.webp" alt="Book Cover" /> 
+        <span class="badge">Bestseller</span>
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">Atomic Habits</div>
+        </div>
+      </div>
+            <div class="book-info">
+        <p class="book-genre">SELF-HELP</p>
+        <h3>Atomic Habits</h3>
+        <p class="book-author">James Clear</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+        <span>
+            <span class="book-price"> 90 TMT</span>
+            <span class="old-price"> 110 TMT</span><!-- Remove this line if no sale price -->
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 2 -->
+    <div class="book-card" data-title="Book Title 2" data-price="0.00">
+      <div class="book-cover" style="background:#5C2A1A;">
+         <img src="The_Kite_Runner_.webp" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">The Kite Runner<br/>Here</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">Literary Fiction</p>
+        <h3>The Kite Runner</h3>
+        <p class="book-author">Khaled Hosseini</p>
+        <div class="stars">★★★★☆</div>
+        <div class="book-footer">
+          <span><span class="book-price">90 TMT </span></span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 3 -->
+    <div class="book-card" data-title="Book Title 3" data-price="0.00">
+      <div class="book-cover" style="background:#2D5A1B;">
+        <img src="AThousandSplendidSuns.webp" alt="Book Cover" /> 
+        <span class="badge">New</span>
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">A Thousand Splendid Suns</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">Historical Fiction</p>
+        <h3>A Thousand Splendid Suns</h3>
+        <p class="book-author">Khaled Hosseini</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">90 TMT</span>
+            <span class="old-price">110 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 4 -->
+    <div class="book-card" data-title="Book Title 4" data-price="0.00">
+      <div class="book-cover" style="background:#4A1A5C;">
+       <img src="The Psychology of Money.webp" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">The Psychology of Money<br/>Here</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">Fantasy</p>
+        <h3>The Psychology of Money</h3>
+        <p class="book-author">Morgan Housel</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span><span class="book-price">100 TMT</span></span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 5 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="The Subtle Art of Not Giving a Fck.jpg" alt="Book Cover" /> 
+        <span class="badge">Sale</span>
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">The Subtle Art of Not Giving a F*ck</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">Self-Help</p>
+        <h3>The Subtle Art of Not Giving a F*ck</h3>
+        <p class="book-author">Mark Manson</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">120 TMT</span>
+            <span class="old-price">150 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 6 -->
+    <div class="book-card" data-title="Book Title 6" data-price="0.00">
+      <div class="book-cover" style="background:#1A4A5C;">
+        <img src="The Power of Your Subconscious Mind.png" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">The Power of Your Subconscious Mind</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">Romance</p>
+        <h3>The Power of Your Subconscious Mind</h3>
+        <p class="book-author">Joseph Murphy</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span><span class="book-price">90 TMT</span></span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ★ BOOK 7 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="IKIGAI.jpg" alt="Book Cover" /> 
+        <span class="badge">Sale</span>
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">IKIGAI</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">PHILOSOPHY</p>
+        <h3>IKIGAI</h3>
+        <p class="book-author">Héctor García & Francesc Miralles</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">100 TMT</span>
+            <span class="old-price">120 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- ★ BOOK 8 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="HuntingAdeline.webp" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">Hunting Adeline</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">DARK ROMANCE</p>
+        <h3>Hunting Adeline</h3>
+        <p class="book-author">H. D. Carlton</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">200 TMT</span>
+            <span class="old-price">250 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- ★ BOOK 9 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="Little women.jpg" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">Little Women</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">CLASSIC</p>
+        <h3>Little Women</h3>
+        <p class="book-author">Louisa May Alcott</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">80 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 10 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="Martin.jpg" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">Martin Eden</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">CLASSIC FICTION</p>
+        <h3>Martin Eden</h3>
+        <p class="book-author">Jack London</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">100 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 11 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="1984.jpg" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">1984</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">DYSTOPIAN</p>
+        <h3>1984</h3>
+        <p class="book-author">George Orwell</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">90 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 12 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="the-midnight-library.jpg" alt="Book Cover" /> 
+       
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">The Midnight Library</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">FICTION</p>
+        <h3>The Midnight Library</h3>
+        <p class="book-author">Matt Haig</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">100 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ BOOK 13 -->
+    <div class="book-card" data-title="Book Title 5" data-price="0.00">
+      <div class="book-cover" style="background:#5C4A1A;">
+        <img src="Flowers for Algernon.jpg" alt="Book Cover" /> 
+        <div class="book-cover-overlay">
+          <div class="book-cover-title">Flowers for Algernon</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <p class="book-genre">SCIENCE FICTION</p>
+        <h3>Flowers for Algernon</h3>
+        <p class="book-author">Daniel Keyes</p>
+        <div class="stars">★★★★★</div>
+        <div class="book-footer">
+          <span>
+            <span class="book-price">150 TMT</span>
+          </span>
+          <div class="cart-controls">
+            <button class="cart-btn minus" style="display:none;" onclick="changeQty(this,-1)">−</button>
+            <span class="cart-count-badge">0</span>
+            <button class="cart-btn" onclick="changeQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
+
+
+
+<!-- PROMO -->
+<div class="promo-banner">
+  <div class="promo-text">
+    <h2 data-i18n="promo_title">Free shipping on orders over <span>250 TMT</span></h2>
+    <p data-i18n="promo_desc">Join PageTurn Plus and get unlimited free shipping, early access to sales, and exclusive member discounts.</p>
+  </div>
+  <a href="#" class="btn-primary" data-i18n="promo_btn">Join PageTurn Plus →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Page<span>Turn</span> Books</div>
+      <p data-i18n="footer_desc">A curated independent bookshop bringing great stories to every reader since 2010.</p>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer_shop">Shop</h4>
+      <ul>
+        <li><a href="#" data-i18n="nav_new">New Arrivals</a></li>
+        <li><a href="#" data-i18n="nav_best">Bestsellers</a></li>
+        <li><a href="#" data-i18n="footer_sale">Sale</a></li>
+        <li><a href="#" data-i18n="footer_gift">Gift Cards</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer_help">Help</h4>
+      <ul>
+        <li><a href="#" data-i18n="footer_shipping">Shipping Info</a></li>
+        <li><a href="#" data-i18n="footer_returns">Returns</a></li>
+        <li><a href="#" data-i18n="footer_faq">FAQ</a></li>
+        <li><a onclick="openModal()" data-i18n="footer_contact">Contact Us</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-i18n="footer_follow">Follow Us</h4>
+      <ul>
+        <!-- ★ Replace YOUR_USERNAME -->
+        <li><a href="https://instagram.com/dreamy_bookstore_" target="_blank">📸 @dreamy_bookstore_</a></li>
+        <!-- ★ Replace phone -->
+        <li><a href="tel:+99371032500">📞 +99371032500</a></li>
+        <!-- ★ Replace email -->
+        <li><a href="mailto:bossan059@gmail.com">✉️ bossan059@gmail.com</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom" data-i18n="footer_copy">© 2026 PageTurn Books. All rights reserved.</div>
+</footer>
+
+<!-- ============================================================
+     CONTACT MODAL
+     ★ EDIT YOUR REAL CONTACTS BELOW (search for ★ EDIT)
+============================================================ -->
+<div class="modal-overlay" id="contactModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 data-i18n="modal_title">Contact Us</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="contact-cards">
+
+        <!-- ★ EDIT: replace +1234567890 and the display number -->
+        <a href="tel:+99371032500" class="contact-card">
+          <div class="contact-icon phone">📞</div>
+          <div>
+            <div class="contact-label" data-i18n="contact_phone">Phone</div>
+            <div class="contact-value">+99371032500</div>
+          </div>
+        </a>
+
+        <!-- ★ EDIT: replace YOUR_USERNAME in both href and display -->
+        <a href="https://instagram.com/dreamy_bookstore_" target="_blank" class="contact-card">
+          <div class="contact-icon insta">📸</div>
+          <div>
+            <div class="contact-label">Instagram</div>
+            <div class="contact-value">@dreamy_bookstore_</div>
+          </div>
+        </a>
+
+        <!-- ★ EDIT: replace yourname@gmail.com in both href and display -->
+        <a href="bossan059@gmail.com" class="contact-card">
+          <div class="contact-icon email">✉️</div>
+          <div>
+            <div class="contact-label" data-i18n="contact_email">Email</div>
+            <div class="contact-value">bossan059@gmail.com</div>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- QR CODE — auto-generated from your Instagram link -->
+      <div class="qr-section">
+        <div class="qr-box" id="qrcode"></div>
+        <div class="qr-info">
+          <h4 data-i18n="qr_title">Scan to find us on Instagram</h4>
+          <p data-i18n="qr_desc">Point your phone camera at this QR code to open our Instagram page instantly.</p>
+        </div>
+      </div>
+
+      <!-- MESSAGE FORM -->
+      <div class="modal-divider" data-i18n="modal_or">or send a message</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="form_name">Your Name</label>
+          <input type="text" id="senderName" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label data-i18n="form_email">Your Email</label>
+          <input type="email" id="senderEmail" placeholder="your@email.com" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="form_subject">Subject</label>
+        <input type="text" id="msgSubject" placeholder="Book inquiry..." />
+      </div>
+      <div class="form-group">
+        <label data-i18n="form_message">Message</label>
+        <textarea id="msgBody" rows="4" placeholder="Write your message here..."></textarea>
+      </div>
+      <button class="btn-send" onclick="sendMessage()" data-i18n="form_send">Send Message →</button>
+      <div class="form-success" id="formSuccess" data-i18n="form_success">✅ Opening your email app — just hit Send!</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-sidebar-header">
+    <h3 data-i18n="cart_title">Your Cart</h3>
+    <button class="modal-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-sidebar-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <span>🛒</span>
+      <p data-i18n="cart_empty">Your cart is empty</p>
+    </div>
+  </div>
+  <div class="cart-sidebar-footer">
+    <div class="cart-total">
+      <span data-i18n="cart_total">Total</span>
+      <span class="cart-total-price" id="cartTotal">TMT 0.00</span>
+    </div>
+    <button class="btn-checkout" onclick="openCheckout()" data-i18n="cart_checkout">Checkout →</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     CHECKOUT MODAL
+     When customer fills this in, it opens their email app
+     pre-filled with the order details sent to YOUR email.
+     ★ Search for YOUR_EMAIL below and replace with your real email.
+============================================================ -->
+<div class="modal-overlay" id="checkoutModal" onclick="closeCheckoutOutside(event)">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h2 id="checkoutModalTitle">Place Your Order</h2>
+      <button class="modal-close" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body" id="checkoutBody">
+
+      <!-- ORDER SUMMARY -->
+      <div style="background:#fff;border:1px solid var(--warm-gray);border-radius:4px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;" id="co_summary_label">Order Summary</div>
+        <div id="checkoutOrderList" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.75rem;"></div>
+        <div style="border-top:1px solid var(--warm-gray);padding-top:0.75rem;display:flex;justify-content:space-between;align-items:baseline;">
+          <span style="font-size:0.82rem;color:var(--muted);" id="co_total_label">Total</span>
+          <span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;" id="checkoutTotalDisplay">TMT 0.00</span>
+        </div>
+      </div>
+
+      <!-- CUSTOMER DETAILS FORM -->
+      <div class="form-row">
+        <div class="form-group">
+          <label id="co_name_label">Full Name *</label>
+          <input type="text" id="co_name" placeholder="John Doe" />
+        </div>
+        <div class="form-group">
+          <label id="co_phone_label">Phone Number *</label>
+          <input type="tel" id="co_phone" placeholder="+1 234 567 890" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label id="co_email_label">Your Email</label>
+        <input type="email" id="co_email" placeholder="your@email.com" />
+      </div>
+      <div class="form-group">
+        <label id="co_address_label">Delivery Address *</label>
+        <textarea id="co_address" rows="2" placeholder="Street, City, Country..."></textarea>
+      </div>
+      <div class="form-group">
+        <label id="co_note_label">Note (optional)</label>
+        <textarea id="co_note" rows="2" placeholder="Any special requests..."></textarea>
+      </div>
+
+      <button class="btn-send" onclick="submitOrder()" id="co_submit_btn">Send Order →</button>
+
+      <!-- SUCCESS STATE -->
+      <div class="form-success" id="checkoutSuccess" style="margin-top:1rem;font-size:0.9rem;line-height:1.6;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TRANSLATIONS
+// ============================================================
+const translations = {
+  en: {
+    nav_shop:"Shop", nav_new:"New Arrivals", nav_best:"Bestsellers", nav_about:"About",
+    cart:"🛒 Cart",
+    hero_tag:"— Spring Sale · Up to 40% Off",
+    hero_title:"Stories that<br/>stay with you <em>forever.</em>",
+    hero_desc:"Curated books for every reader. From timeless classics to debut novels — your next favorite is here.",
+    hero_btn1:"Browse Collection", hero_btn2:"View Bestsellers",
+    genre_title:"Browse by Genre", genre_all:"All Books", genre_fantasy:"Fantasy",
+    genre_mystery:"Mystery", genre_romance:"Romance", genre_scifi:"Sci-Fi",
+    genre_classics:"Classics", genre_nonfiction:"Non-Fiction", genre_children:"Children",
+    featured_title:"Featured Books", see_all:"See All",
+    promo_title:'Free shipping on orders over <span>250 TMT/span>',
+    promo_desc:"Join PageTurn Plus and get unlimited free shipping, early access to sales, and exclusive discounts.",
+    promo_btn:"Join PageTurn Plus →",
+    footer_desc:"A curated independent bookshop bringing great stories to every reader since 2026.",
+    footer_shop:"Shop", footer_sale:"Sale", footer_gift:"Gift Cards",
+    footer_help:"Help", footer_shipping:"Shipping Info", footer_returns:"Returns",
+    footer_faq:"FAQ", footer_contact:"Contact Us", footer_follow:"Follow Us",
+    footer_copy:"© 2026 PageTurn Books. All rights reserved.",
+    modal_title:"Contact Us", contact_phone:"Phone", contact_email:"Email",
+    qr_title:"Scan to find us on Instagram",
+    qr_desc:"Point your phone camera at this QR code to open our Instagram page instantly.",
+    modal_or:"or send a message",
+    form_name:"Your Name", form_email:"Your Email", form_subject:"Subject",
+    form_message:"Message", form_send:"Send Message →",
+    form_success:"✅ Opening your email app — just hit Send!",
+    cart_title:"Your Cart", cart_empty:"Your cart is empty",
+    cart_total:"Total", cart_checkout:"Checkout →",
+    co_title:"Place Your Order", co_summary:"Order Summary", co_total:"Total",
+    co_name:"Full Name *", co_phone:"Phone Number *", co_email:"Your Email",
+    co_address:"Delivery Address *", co_note:"Note (optional)",
+    co_submit:"Send Order →",
+    co_success:"✅ Your email app is opening! Your order has been sent to the shop. We'll contact you to confirm.",
+  },
+  ru: {
+    nav_shop:"Магазин", nav_new:"Новинки", nav_best:"Бестселлеры", nav_about:"О нас",
+    cart:"🛒 Корзина",
+    hero_tag:"— Весенняя распродажа · Скидки до 40%",
+    hero_title:"Истории, которые<br/>остаются с вами <em>навсегда.</em>",
+    hero_desc:"Подборка книг для каждого читателя. От классики до дебютных романов — ваша следующая любимая здесь.",
+    hero_btn1:"Смотреть коллекцию", hero_btn2:"Бестселлеры",
+    genre_title:"Обзор по жанрам", genre_all:"Все книги", genre_fantasy:"Фэнтези",
+    genre_mystery:"Детектив", genre_romance:"Романтика", genre_scifi:"Фантастика",
+    genre_classics:"Классика", genre_nonfiction:"Нон-фикшн", genre_children:"Детские",
+    featured_title:"Избранные книги", see_all:"Смотреть все",
+    promo_title:'Бесплатная доставка от <span>250 TMT</span>',
+    promo_desc:"Вступите в PageTurn Plus и получите безлимитную доставку и эксклюзивные скидки.",
+    promo_btn:"Вступить в PageTurn Plus →",
+    footer_desc:"Независимый книжный магазин с 2026 года.",
+    footer_shop:"Магазин", footer_sale:"Распродажа", footer_gift:"Подарочные карты",
+    footer_help:"Помощь", footer_shipping:"Доставка", footer_returns:"Возврат",
+    footer_faq:"Вопросы и ответы", footer_contact:"Связаться с нами", footer_follow:"Мы в соцсетях",
+    footer_copy:"© 2026 PageTurn Books. Все права защищены.",
+    modal_title:"Связаться с нами", contact_phone:"Телефон", contact_email:"Эл. почта",
+    qr_title:"Сканируйте для Instagram",
+    qr_desc:"Наведите камеру телефона на QR-код, чтобы открыть нашу страницу в Instagram.",
+    modal_or:"или отправьте сообщение",
+    form_name:"Ваше имя", form_email:"Ваш email", form_subject:"Тема",
+    form_message:"Сообщение", form_send:"Отправить →",
+    form_success:"✅ Открывается почта — нажмите Отправить!",
+    cart_title:"Корзина", cart_empty:"Корзина пуста",
+    cart_total:"Итого", cart_checkout:"Оформить заказ →",
+    co_title:"Оформить заказ", co_summary:"Состав заказа", co_total:"Итого",
+    co_name:"Полное имя *", co_phone:"Номер телефона *", co_email:"Ваш email",
+    co_address:"Адрес доставки *", co_note:"Примечание (необязательно)",
+    co_submit:"Отправить заказ →",
+    co_success:"✅ Открывается почта! Заказ отправлен в магазин. Мы свяжемся с вами для подтверждения.",
+  },
+  tr: {
+    nav_shop:"Mağaza", nav_new:"Yeni Gelenler", nav_best:"Çok Satanlar", nav_about:"Hakkında",
+    cart:"🛒 Sepet",
+    hero_tag:"— İlkbahar İndirimi · %40'a Kadar",
+    hero_title:"Seninle <em>sonsuza</em><br/>kalan hikayeler.",
+    hero_desc:"Her okuyucuya özel kitaplar. Klasiklerden ilk romanlara — bir sonraki favorin burada.",
+    hero_btn1:"Koleksiyona Göz At", hero_btn2:"Çok Satanlar",
+    genre_title:"Türe Göre Gözat", genre_all:"Tüm Kitaplar", genre_fantasy:"Fantastik",
+    genre_mystery:"Gizem", genre_romance:"Romantik", genre_scifi:"Bilim Kurgu",
+    genre_classics:"Klasikler", genre_nonfiction:"Kurgu Dışı", genre_children:"Çocuk",
+    featured_title:"Öne Çıkan Kitaplar", see_all:"Tümünü Gör",
+    promo_title:'<span>250 TMT</span> üzeri ücretsiz kargo',
+    promo_desc:"PageTurn Plus ile sınırsız ücretsiz kargo ve özel indirimler kazanın.",
+    promo_btn:"PageTurn Plus'a Katıl →",
+    footer_desc:"2026'dan beri her okuyucuya harika hikayeler sunan kitabevi.",
+    footer_shop:"Mağaza", footer_sale:"İndirim", footer_gift:"Hediye Kartları",
+    footer_help:"Yardım", footer_shipping:"Kargo", footer_returns:"İadeler",
+    footer_faq:"SSS", footer_contact:"Bize Ulaşın", footer_follow:"Bizi Takip Edin",
+    footer_copy:"© 2026 PageTurn Books. Tüm hakları saklıdır.",
+    modal_title:"Bize Ulaşın", contact_phone:"Telefon", contact_email:"E-posta",
+    qr_title:"Instagram için QR kodu tara",
+    qr_desc:"Instagram sayfamızı açmak için telefon kameranızı QR koda doğrultun.",
+    modal_or:"veya mesaj gönderin",
+    form_name:"Adınız", form_email:"E-postanız", form_subject:"Konu",
+    form_message:"Mesaj", form_send:"Gönder →",
+    form_success:"✅ E-posta uygulaması açılıyor — Gönder'e basın!",
+    cart_title:"Sepetiniz", cart_empty:"Sepetiniz boş",
+    cart_total:"Toplam", cart_checkout:"Sipariş Ver →",
+    co_title:"Siparişinizi Verin", co_summary:"Sipariş Özeti", co_total:"Toplam",
+    co_name:"Ad Soyad *", co_phone:"Telefon Numarası *", co_email:"E-postanız",
+    co_address:"Teslimat Adresi *", co_note:"Not (isteğe bağlı)",
+    co_submit:"Sipariş Gönder →",
+    co_success:"✅ E-posta uygulamanız açılıyor! Siparişiniz mağazaya gönderildi. Onaylamak için sizi arayacağız.",
+  },
+  tk: {
+    nav_shop:"Dükkan", nav_new:"Täze Gelenler", nav_best:"Iň köp satylýanlar", nav_about:"Barada",
+    cart:"🛒 Sebet",
+    hero_tag:"— Ýaz Arzanladyşy · 40%-e çenli",
+    hero_title:"Siziň bilen <em>hemişelik</em><br/>galýan hekaýalar.",
+    hero_desc:"Her okyjy üçin saýlanan kitaplar. Klassiklerden ilkinji romanlara — indiki söýgüliňiz şu ýerde.",
+    hero_btn1:"Kolleksiýa Göz At", hero_btn2:"Iň köp satylýanlar",
+    genre_title:"Žanr boýunça gözle", genre_all:"Ähli Kitaplar", genre_fantasy:"Fantastika",
+    genre_mystery:"Syr", genre_romance:"Romantika", genre_scifi:"Ylmy Fantastika",
+    genre_classics:"Klassikler", genre_nonfiction:"Publisistika", genre_children:"Çagalar üçin",
+    featured_title:"Saýlanan Kitaplar", see_all:"Hemmesini gör",
+    promo_title:'<span>250 TMT</span>-den ýokary sargytlarda mugt eltip beriş',
+    promo_desc:"PageTurn Plus agzalygy bilen mugt eltip beriş we ýörite arzanladyşlar alyň.",
+    promo_btn:"PageTurn Plus-a giriş →",
+    footer_desc:"2026-njy ýyldan bäri her okyjy üçin ajaýyp hekaýalar hödürleýän kitap dükkany.",
+    footer_shop:"Dükkan", footer_sale:"Arzanladyş", footer_gift:"Sowgat Kartalary",
+    footer_help:"Kömek", footer_shipping:"Eltip Beriş", footer_returns:"Gaýtarmak",
+    footer_faq:"SSS", footer_contact:"Habarlaşyň", footer_follow:"Bizi yzarlaň",
+    footer_copy:"© 2026 PageTurn Books. Ähli hukuklar goralan.",
+    modal_title:"Habarlaşyň", contact_phone:"Telefon", contact_email:"E-poçta",
+    qr_title:"Instagram üçin QR kod skan ediň",
+    qr_desc:"Instagram sahypamyzy açmak üçin telefon kamerany QR koda gönükdiriň.",
+    modal_or:"ýa-da habar iberiň",
+    form_name:"Adyňyz", form_email:"E-poçtaňyz", form_subject:"Mowzuk",
+    form_message:"Habar", form_send:"Iber →",
+    form_success:"✅ E-poçta programmasy açylýar — Ibermek düwmesine basyň!",
+    cart_title:"Sebetiňiz", cart_empty:"Sebet boş",
+    cart_total:"Jemi", cart_checkout:"Sargyt et →",
+    co_title:"Sargytyňyzy iberiň", co_summary:"Sargyt düzümi", co_total:"Jemi",
+    co_name:"Doly adyňyz *", co_phone:"Telefon belgiňiz *", co_email:"E-poçtaňyz",
+    co_address:"Eltip beriş salgysy *", co_note:"Bellik (islege görä)",
+    co_submit:"Sargyt iber →",
+    co_success:"✅ E-poçta programmasy açylýar! Sargytyňyz dükkana iberildi. Tassyklamak üçin sizi arayarys.",
+  }
+};
+
+// ============================================================
+// LANGUAGE ENGINE
+// ============================================================
+let currentLang = 'en';
+function setLang(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+  updateCartBtn();
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
+  });
+  document.documentElement.lang = lang;
+}
+
+// ============================================================
+// CART SYSTEM
+// ============================================================
+const cart = {}; // { bookId: { title, price, qty } }
+
+function changeQty(btn, delta) {
+  const card = btn.closest('.book-card');
+  const id = Array.from(document.querySelectorAll('.book-card')).indexOf(card);
+  const title = card.querySelector('h3').textContent;
+  const priceText = card.querySelector('.book-price').textContent.replace('TMT','');
+  const price = parseFloat(priceText) || 0;
+
+  const controls = btn.closest('.cart-controls');
+  const badge = controls.querySelector('.cart-count-badge');
+  const minusBtn = controls.querySelector('.minus');
+
+  if (!cart[id]) cart[id] = { title, price, qty: 0 };
+  cart[id].qty += delta;
+  if (cart[id].qty < 0) cart[id].qty = 0;
+
+  badge.textContent = cart[id].qty;
+  badge.style.display = cart[id].qty > 0 ? 'flex' : 'none';
+  minusBtn.style.display = cart[id].qty > 0 ? 'flex' : 'none';
+
+  updateCartBtn();
+  renderCart();
+}
+
+function updateCartBtn() {
+  const total = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+  const t = translations[currentLang];
+  document.querySelector('.nav-cart').innerHTML = t['cart'] + ` (${total})`;
+}
+
+function renderCart() {
+  const body = document.getElementById('cartBody');
+  const empty = document.getElementById('cartEmpty');
+  const items = Object.entries(cart).filter(([,v]) => v.qty > 0);
+
+  // Remove old item rows
+  body.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+  if (items.length === 0) {
+    empty.style.display = 'block';
+    document.getElementById('cartTotal').textContent = '$0.00';
+    return;
+  }
+  empty.style.display = 'none';
+
+  let total = 0;
+  items.forEach(([id, item]) => {
+    total += item.price * item.qty;
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <div style="flex:1">
+        <div class="cart-item-title">${item.title}</div>
+        <div class="cart-item-price">${(item.price * item.qty).toFixed(2)} TMT</div>
+      </div>
+      <div class="cart-item-controls">
+        <button class="ci-btn ci-minus" onclick="cartSidebarChange(${id},-1)">−</button>
+        <span class="ci-count">${item.qty}</span>
+        <button class="ci-btn ci-plus" onclick="cartSidebarChange(${id},1)">+</button>
+      </div>`;
+    body.appendChild(row);
+  });
+  document.getElementById('cartTotal').textContent = total.toFixed(2) + ' TMT ' ;
+}
+
+function cartSidebarChange(id, delta) {
+  const card = document.querySelectorAll('.book-card')[id];
+  const controls = card.querySelector('.cart-controls');
+  const btn = delta > 0 ? controls.querySelector('.cart-btn:not(.minus)') : controls.querySelector('.minus');
+  changeQty(btn, delta);
+}
+
+function openCart() {
+  document.getElementById('cartSidebar').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cartSidebar').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+// CONTACT MODAL
+// ============================================================
+function openModal() {
+  document.getElementById('contactModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('contactModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('contactModal')) closeModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeCart(); closeCheckout(); } });
+
+function sendMessage() {
+  const name    = document.getElementById('senderName').value.trim();
+  const email   = document.getElementById('senderEmail').value.trim();
+  const subject = document.getElementById('msgSubject').value.trim();
+  const body    = document.getElementById('msgBody').value.trim();
+  if (!name || !body) { alert('Please fill in your name and message.'); return; }
+  // ★ EDIT: replace with your real email
+  const toEmail = 'bossan059@gmail.com';
+  const fullSubject = subject || 'Message from ' + name;
+  const fullBody = `From: ${name}\nEmail: ${email}\n\n${body}`;
+  window.location.href = `mailto:${toEmail}?subject=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
+  document.getElementById('formSuccess').style.display = 'block';
+}
+
+// ============================================================
+// GENRE PILLS
+// ============================================================
+document.querySelectorAll('.genre-pill').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ============================================================
+// CHECKOUT MODAL
+// ============================================================
+function openCheckout() {
+  const items = Object.values(cart).filter(i => i.qty > 0);
+  if (items.length === 0) return;
+
+  // Populate order summary
+  const list = document.getElementById('checkoutOrderList');
+  list.innerHTML = '';
+  let total = 0;
+  items.forEach(item => {
+    const subtotal = item.price * item.qty;
+    total += subtotal;
+    const row = document.createElement('div');
+    row.className = 'co-item';
+    row.innerHTML = `
+      <span><span class="co-item-name">${item.title}</span><span class="co-item-qty">×${item.qty}</span></span>
+      <span class="co-item-price">${subtotal.toFixed(2)}TMT</span>`;
+    list.appendChild(row);
+  });
+  document.getElementById('checkoutTotalDisplay').textContent = total.toFixed(2) + ' TMT';
+
+  // Apply translations to checkout modal labels
+  const t = translations[currentLang];
+  document.getElementById('checkoutModalTitle').textContent = t.co_title;
+  document.getElementById('co_summary_label').textContent   = t.co_summary;
+  document.getElementById('co_total_label').textContent     = t.co_total;
+  document.getElementById('co_name_label').textContent      = t.co_name;
+  document.getElementById('co_phone_label').textContent     = t.co_phone;
+  document.getElementById('co_email_label').textContent     = t.co_email;
+  document.getElementById('co_address_label').textContent   = t.co_address;
+  document.getElementById('co_note_label').textContent      = t.co_note;
+  document.getElementById('co_submit_btn').textContent      = t.co_submit;
+  document.getElementById('checkoutSuccess').style.display  = 'none';
+
+  // Clear old inputs
+  ['co_name','co_phone','co_email','co_address','co_note'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  closeCart();
+  document.getElementById('checkoutModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeCheckoutOutside(e) {
+  if (e.target === document.getElementById('checkoutModal')) closeCheckout();
+}
+
+function submitOrder() {
+  const name    = document.getElementById('co_name').value.trim();
+  const phone   = document.getElementById('co_phone').value.trim();
+  const email   = document.getElementById('co_email').value.trim();
+  const address = document.getElementById('co_address').value.trim();
+  const note    = document.getElementById('co_note').value.trim();
+
+  if (!name || !phone || !address) {
+    alert('Please fill in Name, Phone, and Address.');
+    return;
+  }
+
+  // Build order lines
+  const items = Object.values(cart).filter(i => i.qty > 0);
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const orderLines = items.map(i =>
+    `  - ${i.title} × ${i.qty}  →  ${(i.price * i.qty).toFixed(2)} TMT`
+  ).join('\n');
+
+  const subject = `📦 New Order from ${name}`;
+  const body =
+`NEW ORDER — PageTurn Books
+==========================
+Customer : ${name}
+Phone    : ${phone}
+Email    : ${email || '—'}
+Address  : ${address}
+Note     : ${note || '—'}
+
+ORDER ITEMS:
+${orderLines} 
+
+──────────────────────────
+TOTAL    : ${total.toFixed(2)} TMT
+==========================`;
+
+  // ★ EDIT: replace with your real email address
+  const shopEmail = 'bossan059@gmail.com';
+
+  window.location.href =
+    `mailto:${shopEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  const t = translations[currentLang];
+  const successEl = document.getElementById('checkoutSuccess');
+  successEl.innerHTML = t.co_success;
+  successEl.style.display = 'block';
+  document.getElementById('co_submit_btn').disabled = true;
+  document.getElementById('co_submit_btn').style.opacity = '0.5';
+}
+
+
+// ★ EDIT: replace YOUR_USERNAME with your real Instagram username
+// ============================================================
+window.addEventListener('load', () => {
+  const instaUrl = 'https://instagram.com/dreamy_bookstore_';
+  new QRCode(document.getElementById('qrcode'), {
+    text: instaUrl,
+    width: 110,
+    height: 110,
+    colorDark: '#1A1208',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+});
+</script>
+</body>
+</html>
